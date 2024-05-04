@@ -7,7 +7,7 @@ class RMap:
         self.vmap = folium.Map(location=coords, zoom_start=zoom)
 
     @staticmethod
-    def create_waypoint(S:Stop):
+    def _create_waypoint(S:Stop):
         color = 'blue'
         if S.partner is None:
             color = 'red'
@@ -18,36 +18,33 @@ class RMap:
         return M
     
     @staticmethod
-    def create_PolyLine(Stops:list(Stop)):
-        if Stops[0].partner is None:
-            color = 'black'
-        else:
-             color = 'blue'
-
+    def _create_PolyLine(Stops:list[Stop], companion):
         points = []
+        if companion:
+            color = "blue"
+        else:
+            color = "black"
         for stop in Stops:
             points.append(stop.coords)
         P = folium.PolyLine(locations = points,
             color = color,
-            weight = 5,
+            weight = 10,
             opacity = 0.7,
-            dash_array = '5, 5')
+            dash_array = '1, 12')
         return P
         
     
     def add_waypoints(self, R:Route):
         for S in R:
-            self.create_waypoint(S).add_to(self.vmap)
+            self._create_waypoint(S).add_to(self.vmap)
         
     def draw_PolyLine(self, R:Route):
-        i = 1
-        line = [R[0]]
-        while (i < len(R)):
-            if R[i].partner == R[i - 1].partner:
-                line.append(R[i])
-            else:
-                self.create_PolyLine(line).add_to(self.vmap)
+        i = 0
+        while (i < len(R) - 1):
+            self._create_PolyLine([R[i], R[i+1]], not ((R[i].partner is None) or (R[i+1].partner is None))).add_to(self.vmap)
             i = i + 1
+            
+
     def return_map(self):
         return self.vmap
     
