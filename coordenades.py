@@ -1,3 +1,10 @@
+import json
+with open('dict_cities.txt', 'r') as file:
+    data = file.read()
+    dictionary = json.loads(data)
+print(dictionary)
+
+
 def assign_coordenates(city):
     if city == "Paris":
         return (2.355006,48.87993)
