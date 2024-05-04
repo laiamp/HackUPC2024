@@ -2,10 +2,23 @@ import networkx as nx
 from math import sqrt
 import heapq
 import networkx as nx
-import xml.etree.ElementTree as ET
-from sklearn.neighbors import KNeighborsClassifier, DistanceMetric
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from typing import TypeAlias
+
+from eurotrain import *
+
+@dataclass(frozen=True)
+class Stop:
+    name: str
+    coords: tuple[float,float]
+    event: bool
+    date: datetime
+    partner: str
+
+Route: TypeAlias = list[Stop]
+
+
 
 @dataclass(frozen=True)
 class User:
@@ -19,7 +32,7 @@ class User:
     budget: int
     
 
-def assign_coordenates(city):
+def coordinates(city):
     if city == "Paris":
         return (2.355006,48.87993)
     elif city == "Amsterdam":
@@ -54,39 +67,17 @@ def assign_coordenates(city):
         return (9.204492,45.485641)
 
 
-def intersection(user, source):
-    return user.final_date >= source.initial_date  and user.initial_date < source.end_date
+def intersection(user, source, flex):
+    return user.final_date >= source.initial_date - flex[0]  and user.initial_date < source.end_date + flex[1]
 
 
-def filter_dates(users, source):
-    return [user for user in users if intersection(user, source)]
+def filter_dates(users, source, flex):
+    return [user for user in users if intersection(user, source, flex)]
 
 
-            
 def get_dates(users, dict_path_users, G):
-    dates = {user: [] for user in users}
+    return {user: [user.initial_date + timedelta(days=i)] for user in users for i in range(len(dict_path_users[user]))}
     
-    # llista amb data d'arribada a cada node
-    for user in users:
-        cur_date = user.initial_date
-        for i,node in enumerate(dict_path_users[user]):
-            dates[user].append(cur_date)
-            if i < len(dict_path_users[user]) - 1:
-                cur_date += timedelta(hours=G[node][G.nodes[dict_path_users[user][i+1]]]["hours"])
-
-    return dates
-
-
-def travel_time(path, G):
-    hours = 0
-
-    for i in range(len(path)):
-        if i < len(path) - 1:
-            hours += G[path[i]][path[i+1]]["hours"]
-
-    return hours
-            
-
 
 def get_joined(source, dates, dict_path_users):
     source_nodes = set(dict_path_users[source])
@@ -94,22 +85,12 @@ def get_joined(source, dates, dict_path_users):
     joined = {}
     for user, path in dict_path_users.items():
         for i, node in enumerate(path):
-            # mirem quin arriba abans
-            # mirem si el que arriba abans es pot esperar
-            # si pot tuto bene
             if node in source_nodes:
-                if dates[user][i].date() <= dates[source][i].date():
-                    waiter = user
+                if user in joined:
+                    joined[user].append((node, dates[user][i]))
                 else:
-                    waiter = source
-
-                if dates[user][i].date() - dates[source][i].date() < travel_time(user)
-                if abs() <= timedelta(days=1):
-                    if user in joined:
-                        joined[user].append(node)
-                    else:
-                        joined[user] = [node]
-    
+                    joined[user] = [(node, dates[user][i])]
+        
     return joined
 
 
@@ -127,31 +108,92 @@ def p_with_more_affinity(user:User, k_nearest: list[User], p:int) -> list[User]:
     return [heapq.heappop(min_distance)[1] for _ in range(p)]       
 
 
-def main():
+
+def get_routes(root, flex, users) -> list[Route]:
     # busco gent que intersequi quant a dates
-    G = nx.Graph()
-    users = filter_dates(users, source)
+    G = get_graph_from_kml("Eurail Map.kml")
+    users = filter_dates(users, root, flex) # done (té en compte flexibility)
  
     # faig path òptim per cadascú
-    dict_path_users = {user: nx.dijkstra_path(G, user, user.city_orig) for user in users}
+    dict_path_users: dict[User, list[nx.node]] = {user: nx.dijkstra_path(G, user, user.city_orig) for user in users}
+    dates: dict[User, list[datetime]] = get_dates(users, dict_path_users, G)
+    joined: dict[User, list[tuple[nx.node, datetime]]] = get_joined(root, dates, dict_path_users)
+    matches = p_with_more_affinity(root, list(joined.keys()), p=10)
     
-    dates = get_dates(users, dict_path_users, G)
-    joined = get_joined(source, dates, dict_path_users)
     
-    # busco si algú coincideix en algun node amb mi
-    matches = p_with_more_affinity(source, list(joined.keys()), p=10)
-    
-    for match in matches:
-        # busquem distància entre ori-dest per tots dos nodes
-        # busquem totes les parelles de punts tals que
-        #   dist(ori, punt1) < dist(ori,dest)
-        #   dist(ori, punt1) + dist(punt2, dest) + dist(punt1,punt2) <= 1.5*dist(ori,dest)
-        #   dist(punt2, dest) < dist(ori,dest)
+    routes = [[Stop(G[dict_path_users[root][i]]["name"], node, i == len(dict_path_users) - 1, dates[i], None) for i in range(len(dict_path_users))]]
 
-    # donat un match fem plot dels camins. 
-    # definir en quin instant comencen a anar junts
-    #   si arriben en instants diferents hem d'esperar-lo i buscar activitat
-    # definir en quin instant deixen d'anar junts (potser destí)
+
+    for match in matches:
+        node, data_match = joined[match][0]
+        route = []
+        # same day
+        if data_match.date() == dates[root][dict_path_users[root].index(node)].date():
+            # afegeix tots els nodes de path
+            # des de 0 fins a node - 1 --> None
+            # des de node fins a dict_path_users[root].index(node)
+            for i in range(len(dict_path_users[root])):
+                name = G[dict_path_users[root][i]]["name"]
+                coord = dict_path_users[root][i]
+                event = False if i < len(dict_path_users[root]) - 1 else True
+                date = dates[root][i].date()
+                partner = match.name if dict_path_users[root].index(node) <= i <= dict_path_users[root].index(joined[match][-1]) else None
+
+                route.append(Stop(name,coord,event,date,partner))
+            
+            routes.append(route)
+            print("atope tenim match perfecte!!")
+
+        elif dates[root][dict_path_users[root].index(node)].date() - data_match.date() <=  flex[0]: 
+            
+            for i in range(len(dict_path_users[root])):
+                name = G[dict_path_users[root][i]]["name"]
+                coord = dict_path_users[root][i]
+                event = False if i < len(dict_path_users[root]) - 1 else True
+                date = dates[root][i].date() - (dates[root][dict_path_users[root].index(node)].date() - data_match.date())
+                partner = match.name if dict_path_users[root].index(node) <= i <= dict_path_users[root].index(joined[match][-1]) else None
+
+                route.append(Stop(name,coord,event,date,partner))
+            
+            routes.append(route)
+            
+            print(f'them davançar {"X"} dies')
+
+
+        elif data_match.date() - dates[root][dict_path_users[root].index(node)].date() <= flex[1]: # arribo abans
+            # atrassem
+            print(f'them datrassar {"X"} dies')
+            for i in range(len(dict_path_users[root])):
+                name = G[dict_path_users[root][i]]["name"]
+                coord = dict_path_users[root][i]
+                event = False if i < len(dict_path_users[root]) - 1 else True
+                date = dates[root][i].date() + (data_match.date() - dates[root][dict_path_users[root].index(node)].date())
+                partner = match.name if dict_path_users[root].index(node) <= i <= dict_path_users[root].index(joined[match][-1]) else None
+
+                route.append(Stop(name,coord,event,date,partner))
+            
+            routes.append(route)
+
+            route = []
+            print("podem buscar-te activitats per dies X")
+            for i in range(len(dict_path_users[root])):
+                
+                dict_path_users[root][i]
+                name = G[dict_path_users[root][i]]["name"]
+                coord = dict_path_users[root][i]
+                event = False if i < len(dict_path_users[root]) - 1 else True
+                date = dates[root][i].date()
+                partner = match.name if dict_path_users[root].index(node) <= i <= dict_path_users[root].index(joined[match][-1]) else None
+                if dict_path_users[root][i] == node:
+                    for _ in range(data_match.date() - dates[root][dict_path_users[root].index(node)].date()):
+                        route.append(Stop(name,coord,event,date,partner))
+                else:
+                    route.append(Stop(name,coord,event,date,partner))
+            
+            routes.append(route)
+
+
+    return routes 
 
 
 '''
@@ -166,15 +208,10 @@ Volem ajuntar rutes amb altres users
 - calculem temps de fer viatge. El temps que pot esperar es end_date - start_date - travel.
 
 
-
-
 Idees: 
 - Tu t'acobles al viatge d'algú que té shortest path.
 - Proposes dues rutes: una sol i una altra amb algú que faci ruta similar i tingui interessos semblats
 - Tenim en compte dates
 - Destins en la mateixa direcció (maybe utilitzar angles)
 
-
-- if coincideixen --> aniran junts
-- filtrem segons angle
 '''
