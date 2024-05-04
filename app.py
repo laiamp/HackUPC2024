@@ -27,16 +27,20 @@ def get_data():
 def calculate_route():
     pass
 
-def render_map():
+def render_map(route):
     vmap = folium.Map(location = (49.20, 10.97), zoom_start= 5)
-    #points = calculate_route()
     for point in points:
         folium.Marker(point).add_to(vmap)
     folium.PolyLine(points).add_to(vmap)
-    
-    st_folium(vmap)
+    return vmap
 
- 
+def display_connections(points):
+    pass
+
+def display_events(cities):
+    st.subheader("Events")
+    st.selectbox("Select where to explore events", cities)
+
 
 
             
@@ -50,8 +54,15 @@ if page == "Home":
             st.session_state.b1 = 1
 
 if page == "RouteMap":
-    render_map()
-   
+    #route= calculate_route()
+    vmap = render_map(points)
+    st_folium(vmap)
+    #display_events(route.cities)
+    display_events(['Madrid', 'Barcelona'])
+
+
+    
+
     
 
 
