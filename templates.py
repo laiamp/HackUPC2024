@@ -2,23 +2,30 @@ import streamlit as st
 import folium
 import json
 import holidays
+from User import *
+
+
+
 
 api_key = 'YFAuf4V91WCV37YHqNXSZzsATzlEfOOI'
 categories = ['Culture', 'Gastronomy', 'Religion/Spiritual', 'Adventure/Sport', 'Rest', 'History', 'Shopping']
 
 def get_data():
-    data = {}
+    data = User()
     form = st.form('El meu viatge')
-    data['User'] = form.text_input("Username:")
-    data['Age'] = form.number_input("Age:")
-    data['DI'] = form.date_input("Start Date:")
-    data['DF'] = form.date_input("End Date:")
+    User.name = form.text_input("Username:")
+    User.age = form.number_input("Age:")
+    User.initial_date = form.date_input("Start Date:")
+    User.final_date = form.date_input("End Date:")
+    User.city_orig = form.text_input("Start city:")
+    User.city_dest = form.text_input("End city:")
+
     for c in categories:
-        data[str(c)] = form.slider(c)
+        User.topics[str(c)] = form.slider(c)
     form.form_submit_button(label = 'Submit')
     st.session_state.form = data
 
-def calculate_route():
+def backend():
     pass
 
 def render_map(route, city_dict):
