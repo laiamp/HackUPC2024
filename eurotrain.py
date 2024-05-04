@@ -2,7 +2,9 @@ import xml.etree.ElementTree as ET
 import networkx as nx
 import matplotlib.pyplot as plt
 from staticmap import StaticMap, Line, CircleMarker
+from haversine import haversine
 
+SPEED = 200 # km/h
 
 def get_graph_from_kml(filekml) -> nx.Graph:
     # Parsear el archivo KML
@@ -37,7 +39,8 @@ def get_graph_from_kml(filekml) -> nx.Graph:
                 longitude, latitude = float(coordinate[0]), float(coordinate[1])
                 edge_coordinates.append((longitude, latitude))
             
-            G.add_edge(edge_coordinates[0], edge_coordinates[1])
+            dist = haversine(edge_coordinates[0][::-1], edge_coordinates[1][::-1])
+            G.add_edge(edge_coordinates[0], edge_coordinates[1], hours=dist/SPEED)
     
     return G
   
