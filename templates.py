@@ -69,5 +69,48 @@ def get_dict():
     return dictionary
 
 
+def button():
+    def search_events(city, cat, dat):
+        url = "https://app.ticketmaster.com/discovery/v2/events.json"
+        params = {
+            "city": city,
+            "classificationName": cat,
+            "startDateTime": f"{dat}T00:00:00Z",
+            "endDateTime": f"{dat}T23:59:59Z",
+            "apikey": "YfAAYQzOHJMlfY1v9swWxAksA7dSk3YG"
+        }
+
+        response = requests.get(url, params=params)
+        if response.status_code == 200:
+            data = response.json()
+            events = data.get("_embedded", {}).get("events", [])
+            return events
+        else:
+            st.error(f"Error al obtener eventos: {response.status_code}")
+
+            
+    city_input = st.text_input("City")
+    category_input = st.text_input("Category", "")
+    date_input = st.date_input("Date")
+
+    st.title("Event Search")
+
+    if st.button("Search events"):
+        # Lógica para buscar eventos y mostrarlos en la lista
+        events = search_events(city_input, category_input, date_input)
+        if events:
+            st.markdown("### List of events")
+            for event in events:
+                st.write(event['name'])
+                nre_images = st.image(event['images']).len()
+                st.image(event['images'][random.randint(nre_images)]['url'], caption='Imatge', use_column_width=True)
+                st.write(event['images'][0]['ratio'])
+                st.write(event['images'][0]['fallback'])
+
+
+        else:
+            st.write("Events were not found.")
+
+
 
 
