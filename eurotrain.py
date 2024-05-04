@@ -66,6 +66,7 @@ def show(graph: nx.Graph, filename: str) -> None:
 
 def main():
     graph = get_graph_from_kml("Eurail Map.kml")
+    print(len(graph.nodes))
     show(graph, "eurograf.png")
 
 

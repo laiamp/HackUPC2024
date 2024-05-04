@@ -5,18 +5,18 @@ import networkx as nx
 import xml.etree.ElementTree as ET
 from sklearn.neighbors import KNeighborsClassifier, DistanceMetric
 from datetime import datetime, timedelta
+from dataclasses import dataclass
 
+@dataclass(frozen=True)
 class User:
     name: str
-    def __init__(self, name, age, ini_date, final_date, city_orig, city_dest, points, budget):
-        self.name = name
-        self.age = age
-        self.initial_date = ini_date
-        self.final_date = final_date
-        self.city_orig = city_orig
-        self.city_dest = city_dest
-        self.topics = points
-        self.budget = budget
+    age: int
+    initial_date: datetime
+    final_date: datetime
+    city_orig: str
+    city_dest: str
+    topics: dict[str, int] 
+    budget: int
     
 
 def assign_coordenates(city):
@@ -34,7 +34,7 @@ def assign_coordenates(city):
         return (11.247401,43.776565)
     elif city == "Vienna":
         return (16.376485,48.185223)
-    elif city == "Zurich":
+    elif city == "Zurich": 
         return (7.437358,46.948635)
     elif city == "Budapest":
         return (19.083991,47.500173)
@@ -61,31 +61,6 @@ def intersection(user, source):
 def filter_dates(users, source):
     return [user for user in users if intersection(user, source)]
 
-def distance(graph):
-    pass
-
-def k_nearest_nodes(users, graph, source_user, k) -> list[User]:
-    '''Agafem users que estiguin aprop'''
-    pq = []
-
-    for user in users:
-        if user != source_user:
-            heapq.heappush(pq, (distance(node, source_node), node))
-
-    return [heapq.heappop(pq) for _ in range(k)]
-
-
-
-def optimal_paths(source, users, G):
-    # cada persona té un node source i un node destí
-    path_source = nx.dijkstra_path(G, source, source.city_orig)
-    dates_source = []
-
-    curr_date = source.ini_date
-
-    for i,node in enumerate(path_source):
-        if i < len(users) - 1:
-            dist = G[node][path_source[i+1]]["distance"]
 
             
 def get_dates(users, dict_path_users, G):
@@ -102,17 +77,38 @@ def get_dates(users, dict_path_users, G):
     return dates
 
 
+def travel_time(path, G):
+    hours = 0
+
+    for i in range(len(path)):
+        if i < len(path) - 1:
+            hours += G[path[i]][path[i+1]]["hours"]
+
+    return hours
+            
+
+
 def get_joined(source, dates, dict_path_users):
     source_nodes = set(dict_path_users[source])
 
     joined = {}
     for user, path in dict_path_users.items():
         for i, node in enumerate(path):
-            if node in source_nodes and abs(dates[user][i].date() - dates[source][i].date()) <= timedelta(days=1):
-                if user in joined:
-                    joined[user].append(node)
+            # mirem quin arriba abans
+            # mirem si el que arriba abans es pot esperar
+            # si pot tuto bene
+            if node in source_nodes:
+                if dates[user][i].date() <= dates[source][i].date():
+                    waiter = user
                 else:
-                    joined[user] = [node]
+                    waiter = source
+
+                if dates[user][i].date() - dates[source][i].date() < travel_time(user)
+                if abs() <= timedelta(days=1):
+                    if user in joined:
+                        joined[user].append(node)
+                    else:
+                        joined[user] = [node]
     
     return joined
 
@@ -143,8 +139,20 @@ def main():
     joined = get_joined(source, dates, dict_path_users)
     
     # busco si algú coincideix en algun node amb mi
-    matches = p_with_more_affinity(source, users, p=10)
-   
+    matches = p_with_more_affinity(source, list(joined.keys()), p=10)
+    
+    for match in matches:
+        # busquem distància entre ori-dest per tots dos nodes
+        # busquem totes les parelles de punts tals que
+        #   dist(ori, punt1) < dist(ori,dest)
+        #   dist(ori, punt1) + dist(punt2, dest) + dist(punt1,punt2) <= 1.5*dist(ori,dest)
+        #   dist(punt2, dest) < dist(ori,dest)
+
+    # donat un match fem plot dels camins. 
+    # definir en quin instant comencen a anar junts
+    #   si arriben en instants diferents hem d'esperar-lo i buscar activitat
+    # definir en quin instant deixen d'anar junts (potser destí)
+
 
 '''
 Volem ajuntar rutes amb altres users
