@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 from staticmap import StaticMap, Line, CircleMarker
 
 
-def get_graph_from_kml() -> nx.Graph:
+def get_graph_from_kml(filekml) -> nx.Graph:
     # Parsear el archivo KML
     G = nx.Graph()
-    tree = ET.parse('Eurail Map.kml')
+    tree = ET.parse(filekml)
     root = tree.getroot()
 
     # add nodes
@@ -39,9 +39,8 @@ def get_graph_from_kml() -> nx.Graph:
             
             G.add_edge(edge_coordinates[0], edge_coordinates[1])
     
-    
-    show(G, "test")
-    
+    return G
+  
 
 def show(graph: nx.Graph, filename: str) -> None:
     """Export the graph to a PNG file using staticmaps."""
@@ -49,9 +48,6 @@ def show(graph: nx.Graph, filename: str) -> None:
 
     # draw nodes
     for node in graph.nodes:
-        print(type(node))
-        if isinstance(node, str):
-            print(node)
         map.add_marker(CircleMarker(node, "red", 10))
         
 
@@ -61,8 +57,14 @@ def show(graph: nx.Graph, filename: str) -> None:
     
 
     image = map.render()
-    #image.save(filename)
+    image.save(filename)
     image.show()
 
 
-get_graph_from_kml()
+def main():
+    graph = get_graph_from_kml("Eurail Map.kml")
+    show(graph, "eurograf.png")
+
+
+if __name__ == "__main__":
+    main()
