@@ -61,9 +61,9 @@ def inputation(df: pd.DataFrame) -> None:
 
 
     #Plot distributions
-    num_col = interests + ['Age', 'Budget']
-    df[num_col].loc[:,:].hist(bins=20,figsize=(8,8),color='blue')
-    plt.show()
+    #num_col = interests + ['Age', 'Budget']
+    #df[num_col].loc[:,:].hist(bins=20,figsize=(8,8),color='blue')
+    #plt.show()
 
 
 def main():
