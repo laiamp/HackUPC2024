@@ -31,6 +31,9 @@ In order to run this project properly, the following dependencies must be instal
 
 These are the less comon needed libraries. However, it is possible that more libraries need to be installed
 
+#Demo
+In order to run a demo, execute in your terminal the command:
+streamlit run app.py
 
 # Authors
 This project was made by the Business of Flowers:
