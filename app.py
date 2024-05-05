@@ -51,13 +51,14 @@ if __name__ == "__main__":
                 data = (User(3000, name, age,initial_date,final_date,city_orig, city_dest,topics, budget), (timedelta(days=flex1), timedelta(days=flex2)))
 
             if submitted:
-                st.write("Yes")
+                #st.write("Yes")
                 st.session_state.b1 = 1
 
         if st.session_state.b1 == 1:
             st.session_state.routes = get_routes(data[0], data[1], users)
             st.divider()
             form_resume()
+            st.image('Data/logo2_rail_share.png')
 
 
     if page == "SoloOption":
