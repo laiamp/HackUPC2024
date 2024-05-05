@@ -28,6 +28,7 @@ In order to run this project properly, the following dependencies must be instal
   - Requests
   - Random
   - matplotlib
+
 These are the less comon needed libraries. However, it is possible that more libraries need to be installed
 
 
