@@ -1,7 +1,20 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 
+@dataclass(frozen=True)
+class User:
+    id: int
+    name: str
+    age: int
+    initial_date: datetime
+    final_date: datetime
+    city_orig: str
+    city_dest: str
+    topics: dict[str, int] 
+    budget: int
 
 def cities(df: pd.DataFrame) -> None:
     """Number of different cities and which are them"""
@@ -66,14 +79,36 @@ def inputation(df: pd.DataFrame) -> None:
     #plt.show()
 
 
-def main():
+def get_users(filename) -> list[User]:
     # Read data
-    df = pd.read_csv("data.csv", header=0, delimiter=',')
+    df = pd.read_csv(filename, header=0, delimiter=',')
+    users: list[User] = list()
     cities(df)
     dates(df)
     inputation(df)
-    print(df)
+    
+    for _, row in df.iterrows():
+        u: User
+        topics_dict = {'Culture': row['Culture'],'Gastronomy': row['Gastronomy'],
+                       'Music': row['Music'],'Architecture': row['Architecture'],
+                       'Religion/Spiritual': row['Religion/Spiritual'],'Adventure/Sport': row['Adventure/Sport'], 
+                       'Rest': row['Rest'],'History': row['History'],'Shopping': row['Shopping']}
+        
+        user = User(
+            id = row["Trip ID"],
+            name = row['Traveller Name'],
+            age = row['Age'],
+            initial_date = row['Return Date'],
+            final_date = row['Return Date'],
+            city_orig = row['Departure City'],
+            city_dest = row['Arrival City'],
+            topics = topics_dict,
+            budget = row['Budget']
+        )
+        users.append(user)
+
+    return users
 
 
 if __name__ == "__main__":
-    main()
+    get_users()

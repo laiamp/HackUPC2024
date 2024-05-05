@@ -20,8 +20,8 @@ def get_graph_from_kml(filekml) -> nx.Graph:
         if coordinates is not None:
             coordinates = coordinates.strip().split(',')
             longitude, latitude = float(coordinates[0]), float(coordinates[1])
-            print("Nombre:", name)
-            print("Coordenadas (longitud, latitud):", (longitude, latitude))
+            #print("Nombre:", name)
+            #print("Coordenadas (longitud, latitud):", (longitude, latitude))
             G.add_node((float(longitude), float(latitude)), name=name)
 
 
@@ -66,7 +66,7 @@ def show(graph: nx.Graph, filename: str) -> None:
 
 def main():
     graph = get_graph_from_kml("Eurail Map.kml")
-    print(len(graph.nodes))
+    #print(len(graph.nodes))
     show(graph, "eurograf.png")
 
 
