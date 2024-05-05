@@ -105,7 +105,7 @@ def button():
     category_input = st.text_input("Category", "")
     date_input = st.date_input("Date")
 
-    st.title("Event Search")
+    
 
     if st.button("Search events"):
         # Lógica para buscar eventos y mostrarlos en la lista
@@ -124,5 +124,37 @@ def button():
             st.write("Events were not found.")
 
 
+
+def button2(city,dat,cat = None):
+    events = []
+    url = "https://app.ticketmaster.com/discovery/v2/events.json"
+    params = {
+        "city": city,
+        "classificationName": cat,
+        "startDateTime": f"{dat}T00:00:00Z",
+        "endDateTime": f"{dat}T23:59:59Z",
+        "apikey": "YfAAYQzOHJMlfY1v9swWxAksA7dSk3YG"
+    }
+
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        events = data.get("_embedded", {}).get("events", [])
+    else:
+        st.error(f"Error al obtener eventos: {response.status_code}")
+
+    if events:
+        #st.markdown("### List of events")
+        image_urls = []
+        image_names = []
+        for event in events:
+            nre_images = len(event['images'])
+            image_urls.append(event['images'][random.randint(0,nre_images - 1)]['url'])
+            image_names.append(event['name'])
+        return (image_urls, image_names)
+
+    else:
+        #st.write("Events were not found.")
+        return (None, None)
 
 

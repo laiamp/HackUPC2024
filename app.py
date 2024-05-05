@@ -25,7 +25,7 @@ if __name__ == "__main__":
         routes = []
      
                 
-    page = st.sidebar.selectbox("Select Page", ["Home", "SoloOption", "Shared"])
+    page = st.sidebar.selectbox("Select Page", ["Home", "SoloOption", "Shared", "EventSearcher"])
 
 
     if page == "Home":
@@ -62,12 +62,28 @@ if __name__ == "__main__":
 
     if page == "SoloOption":
         vmap = render_map(st.session_state.routes[0])
-        st_folium(vmap)
+        st_folium(vmap,width = 1000)
         st.divider()
-        button()
+        st.header("Events")
+        for S in st.session_state.routes[0]:
+            (urls, names) = button2(S.name, S.date)
+            if urls is not None:
+                st.subheader(f"{S.name} -- {S.date}")
+                st.image(urls, width = 200, caption=names,use_column_width=10)
+                st.divider()
 
     if page == "Shared":
         vmap = render_map(st.session_state.routes[1])
-        st_folium(vmap)
+        st_folium(vmap,width = 1000)
         st.divider()
+        st.header("Events")
+        for S in st.session_state.routes[1]:
+            (urls, names) = button2(S.name, S.date)
+            if urls is not None:
+                st.subheader(f"{S.name} -- {S.date}")
+                st.image(urls, width = 200, caption=names,use_column_width=10)
+                st.divider()
+    
+    if page == "EventSearcher":
+        st.header("EventSearcher")
         button()
