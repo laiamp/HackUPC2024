@@ -17,3 +17,11 @@ In order to find the routes, we used data from the European Interrail to build a
 
 ![Alt text](Images/interrail.jpg)
 
+
+# Authors
+This project was made by the Business of Flowers:
+- Anna Esteve
+- Arnau Martínez
+- Cristina Teixidó
+- Laia Mogas
+
