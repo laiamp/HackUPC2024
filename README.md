@@ -18,6 +18,19 @@ In order to find the routes, we used data from the European Interrail to build a
 ![Alt text](Images/interrail.jpg)
 
 
+
+# Dependencies
+In order to run this project properly, the following dependencies must be installed:
+  - folium
+  - streamlit
+  - networkx
+  - Json
+  - Requests
+  - Random
+  - matplotlib
+These are the less comon needed libraries. However, it is possible that more libraries need to be installed
+
+
 # Authors
 This project was made by the Business of Flowers:
 - Anna Esteve
