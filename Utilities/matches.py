@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 from typing import TypeAlias
 from Objects.User import *
-from eurotrain import *
+from Utilities.eurotrain import *
 from Objects.Route import *
 
 
@@ -109,7 +109,7 @@ def p_with_more_affinity(user: User, k_nearest: list[User], p:int) -> list[User]
 
 def get_routes(root, flex, users) -> list[Route]:
     # busco gent que intersequi quant a dates
-    G = get_graph_from_kml("Eurail Map.kml")
+    G = get_graph_from_kml("Data/Eurail Map.kml")
     users = filter_dates(users, root, flex) # done (té en compte flexibility)
     all_users = users + [root]
     # faig path òptim per cadascú

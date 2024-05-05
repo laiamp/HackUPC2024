@@ -4,8 +4,10 @@ import json
 import holidays
 from Objects.User import *
 from Objects.Route import *
+from Objects.Map import *
 import requests
 import random
+from Utilities.matches import *
 
 
 
@@ -14,21 +16,28 @@ api_key = 'YFAuf4V91WCV37YHqNXSZzsATzlEfOOI'
 categories = ['Culture', 'Gastronomy', 'Religion/Spiritual', 'Adventure/Sport', 'Rest', 'History', 'Shopping']
 
 
-def get_data():
+def get_data(users):
     topics = {}
     form = st.form('El meu viatge')
     name = form.text_input("Username:")
     age = form.number_input("Age:",min_value = 0, value=18, step = 1)
-    initial_date = form.date_input("Start Date:")
-    final_date = form.date_input("End Date:")
+    idp = form.date_input("Start Date:")
+    initial_date = datetime(idp.year,idp.month, idp.day)
+    fdp = form.date_input("End Date:")
+    final_date = datetime(fdp.year, fdp.month, fdp.day)
+    flex1 = form.number_input("Flexibility before trip (days)", step = 1)
+    flex2 = form.number_input("Flexibility after trip (days)", step = 1)
     city_orig = form.text_input("Start city:")
     city_dest = form.text_input("End city:")
     for c in categories:
         topics[str(c)] = form.slider(c)
     budget = form.number_input("Budget:", step = 1)
-    form.form_submit_button(label = 'Submit')
-    data = User(3000, name, age,initial_date,final_date,city_orig, city_dest,topics, budget)
-    st.session_state.form = data
+    submitted = form.form_submit_button(label = 'Submit')
+
+    data = (User(3000, name, age,initial_date,final_date,city_orig, city_dest,topics, budget), (timedelta(days=flex1), timedelta(days=flex2)))
+    if submitted:
+        routes = get_routes(data[0], data[1], users)
+        return routes
 
 def form_resume():
     st.markdown("<h2 style='text-align: center;'>My trip</h2>", unsafe_allow_html=True)
@@ -36,16 +45,12 @@ def form_resume():
 def backend():
     pass
 
-def render_map(route, city_dict):
-    vmap = folium.Map(location = (49.20, 10.97), zoom_start= 5)
-    points = []
-    for city in route: 
-        points.append(city_dict[str(city)])
-    
-    for point in points:
-        folium.Marker(point).add_to(vmap)
-    folium.PolyLine(points).add_to(vmap)
-    return vmap
+def render_map(route):
+    vmap = RMap()
+    vmap.add_waypoints(route)
+    vmap.draw_PolyLine(route)
+    return vmap.return_map()
+
 
 def display_connections(points):
     pass

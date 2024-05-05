@@ -8,11 +8,14 @@ class RMap:
 
     @staticmethod
     def _create_waypoint(S:Stop):
+        pop = f"{S.name.split(' ')[0]}: {S.partner}"
         color = 'blue'
         if S.partner is None:
             color = 'red'
-        M = folium.Marker(S.coords, 
-            popup = S.name,
+            pop = S.name.split(' ')[0]
+        
+        M = folium.Marker((S.coords[1], S.coords[0]), 
+            popup = pop,
             tooltip = str(S.date),
             icon = folium.Icon(color = color))
         return M
@@ -25,7 +28,7 @@ class RMap:
         else:
             color = "black"
         for stop in Stops:
-            points.append(stop.coords)
+            points.append((stop.coords[1], stop.coords[0]))
         P = folium.PolyLine(locations = points,
             color = color,
             weight = 10,

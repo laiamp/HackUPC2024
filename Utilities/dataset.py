@@ -3,18 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from Objects.User import *
 
-@dataclass(frozen=True)
-class User:
-    id: int
-    name: str
-    age: int
-    initial_date: datetime
-    final_date: datetime
-    city_orig: str
-    city_dest: str
-    topics: dict[str, int] 
-    budget: int
 
 def cities(df: pd.DataFrame) -> None:
     """Number of different cities and which are them"""
