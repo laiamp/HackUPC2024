@@ -8,7 +8,7 @@ from Utilities.matches import *
 
 route = ['Rome', 'Madrid', 'Barcelona']
 categories = ['Culture', 'Gastronomy', 'Religion/Spiritual', 'Adventure/Sport', 'Rest', 'History', 'Shopping']
-st.markdown("<h1 style='text-align: center;'>TravelPerk</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center;'>RailShare</h1>", unsafe_allow_html=True)
 city_dict = get_dict()
 
 @st.cache_data
