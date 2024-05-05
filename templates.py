@@ -5,6 +5,7 @@ import holidays
 from Objects.User import *
 from Objects.Route import *
 import requests
+import random
 
 
 
@@ -12,20 +13,25 @@ import requests
 api_key = 'YFAuf4V91WCV37YHqNXSZzsATzlEfOOI'
 categories = ['Culture', 'Gastronomy', 'Religion/Spiritual', 'Adventure/Sport', 'Rest', 'History', 'Shopping']
 
-def get_data():
-    data = User()
-    form = st.form('El meu viatge')
-    User.name = form.text_input("Username:")
-    User.age = form.number_input("Age:")
-    User.initial_date = form.date_input("Start Date:")
-    User.final_date = form.date_input("End Date:")
-    User.city_orig = form.text_input("Start city:")
-    User.city_dest = form.text_input("End city:")
 
+def get_data():
+    topics = {}
+    form = st.form('El meu viatge')
+    name = form.text_input("Username:")
+    age = form.number_input("Age:",min_value = 0, value=18, step = 1)
+    initial_date = form.date_input("Start Date:")
+    final_date = form.date_input("End Date:")
+    city_orig = form.text_input("Start city:")
+    city_dest = form.text_input("End city:")
     for c in categories:
-        User.topics[str(c)] = form.slider(c)
+        topics[str(c)] = form.slider(c)
     form.form_submit_button(label = 'Submit')
+    budget = form.number_input("Budget:", step = 1)
+    data = User(name, age,initial_date,final_date,city_orig, city_dest,topics, budget)
     st.session_state.form = data
+
+def form_resume():
+    st.markdown("<h2 style='text-align: center;'>My trip</h2>", unsafe_allow_html=True)
 
 def backend():
     pass
@@ -101,13 +107,13 @@ def button():
         events = search_events(city_input, category_input, date_input)
         if events:
             st.markdown("### List of events")
+            image_urls = []
+            image_names = []
             for event in events:
-                st.write(event['name'])
-                nre_images = st.image(event['images']).len()
-                st.image(event['images'][random.randint(nre_images)]['url'], caption='Imatge', use_column_width=True)
-                st.write(event['images'][0]['ratio'])
-                st.write(event['images'][0]['fallback'])
-
+                nre_images = len(event['images'])
+                image_urls.append(event['images'][random.randint(0,nre_images - 1)]['url'])
+                image_names.append(event['name'])
+            st.image(image_urls, width = 200, caption=image_names,use_column_width=10)
 
         else:
             st.write("Events were not found.")

@@ -22,12 +22,16 @@ if __name__ == "__main__":
             if st.button("Start trip"):
                 get_data()
                 st.session_state.b1 = 1
+        if st.session_state.b1 == 1:
+            st.divider()
+            form_resume()
 
 
     if page == "RouteMap":
         #route= calculate_route()
         vmap = render_map(route,city_dict)
         st_folium(vmap)
+        st.divider()
         #display_events(route['cities'])
         html_file_url = './pag.html'
         button()
