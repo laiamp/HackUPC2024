@@ -92,7 +92,7 @@ def get_joined(source:User, dates, dict_path_users):
 
 def distance(u1, u2):
     
-    weights = [1, 1, 0.5, 0.5, 1, 1, 1, 0.5, 1, 1, 1]  # We adjust weights as necessary
+    weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0]  # We adjust weights as necessary
     return sum(((u1.topics[topic] - u2.topics[topic]) * weights[i]) ** 2 for i,topic in enumerate(u1.topics.keys()))
 
 
