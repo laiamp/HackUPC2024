@@ -9,11 +9,11 @@ And it's not just about getting from A to B. RailsShare suggests events and acti
 ![Alt text](Images/railshare.png)
 
 
-![Alt text](Images/demo.png)
+![Alt text](Images/demo.jpg)
 
 
 # European trains graph
 In order to find the routes, we used data from the European Interrail to build a graph.
 
-![Alt text](Images/interrail.png)
+![Alt text](Images/interrail.jpg)
 
